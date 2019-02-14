@@ -178,8 +178,7 @@ addTcpPort(){
     firewall-cmd --zone=public --add-port=${tcpPort}/tcp --permanent
     firewall-cmd --reload
   else
-    # iptables -I INPUT -p tcp -m tcp --dport ${tcpPort} -j ACCEPT
-    iptables -4 -A INPUT -p tcp --dport ${tcpPort} -m  -j ACCEPT
+    iptables -4 -A INPUT -p tcp --dport ${tcpPort} -m comment --comment "ss listen port" -j ACCEPT
     service iptables save
   fi
 }
