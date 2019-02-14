@@ -102,9 +102,9 @@ get_unused_port()
 config_read(){
 
   # config encryption password
-  read -p "Password used for encryption (Default: w3cub.service):" sspwd
+  read -p "Password used for encryption (Default: zz.service):" sspwd
   if [[ -z "${sspwd}" ]]; then
-    sspwd="w3cub.service"
+    sspwd="zz.service"
   fi
   echo -e "encryption password: ${GREEN_COLOR}${sspwd}${NO_COLOR}"
 
@@ -259,9 +259,8 @@ config_ss() {
     # add shadowsocks config file
   cat <<EOT > /etc/shadowsocks-libev/config.json
 {
-  "server":${PUBLICIP},
+  "server":"${PUBLICIP}",
   "server_port":${server_port},
-  "local_address": "127.0.0.1",
   "local_port":1080,
   "password":"${sspwd}",
   "timeout":300,
