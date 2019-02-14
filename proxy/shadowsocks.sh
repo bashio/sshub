@@ -68,11 +68,15 @@ intro() {
   clear
   echo
   echo "******************************************************"
-  echo "* OS     : Debian Ubuntu CentOS                      *"
+  echo "* OS     : Ubuntu Debian CentOS                      *"
   echo "* Desc   : auto install shadowsocks on CentOS server *"
-  echo "* Author : https://github.com/shellhub               *"
   echo "******************************************************"
   echo
+}
+
+systemconfig(){
+    PUBLICIP=""
+    IPREGEX="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 }
 
 isRoot() {
@@ -95,7 +99,7 @@ get_unused_port()
   done
 }
 
-config(){
+config_read(){
 
   # config encryption password
   read -p "Password used for encryption (Default: w3cub.service):" sspwd
@@ -183,9 +187,37 @@ addTcpPort(){
   fi
 }
 
+twistlog(){
+    echo "# \${date} \${1} " >> /var/log/tlog
+    [ "\$2" = "echo" ] && echo -e "# \033[\${3};1m\${1} \033[0m"
+}
+
+get_sysinfo() {
+  [ -z "$PUBLICIP" ] && PUBLICIP="$(dig @resolver1.opendns.com -t A -4 myip.opendns.com +short)"
+  if ! printf %s "$PUBLICIP" | grep -Eq "$IPREGEX"; then
+      echo ""
+      twistlog "Cannot detect a valid Public IP"
+      echo -e "# [\033[31;1mCannot detect a valid Public IP. Please fill your Public IP address below! \033[0m]"
+      read -p "Input Your Public IP:" publicip
+      if ! printf %s "$publicip" | grep -Eq "$IPREGEX"; then
+          echo ""
+          twistlog "# The IP:${publicip} is not vailed"
+          echo -e "# [\033[31;1mThe IP:${publicip} you entered is not vailed. Aborting! \033[0m]"
+          echo ""
+          exit 1
+      else
+          PUBLICIP="$publicip"
+          echo ""
+          twistlog "Using Public IP:${PUBLICIP}"
+          echo -e "# [\033[32;1mYou are now using Public IP:${PUBLICIP} \033[0m]"
+          echo ""
+      fi
+  fi
+}
+
 # show install success information
 successInfo(){
-  IP_ADDRESS=$(dig +short myip.opendns.com @resolver1.opendns.com)
+  IP_ADDRESS=${PUBLICIP}
   clear
   echo
   echo "Install completed"
@@ -196,9 +228,12 @@ successInfo(){
   ss_link=$(echo ${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port} | base64)
   ss_link="ss://${ss_link}"
   echo -e "ss_link:\t${GREEN_COLOR}${ss_link}${NO_COLOR}"
-  pip install qrcode >/dev/null
-  echo -n "ss://"`echo -n ${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port} | base64` | qr
-  echo -e "visit:\t\t${GREEN_COLOR}https://www.github.com/shellhub/shellhub${NO_COLOR}"
+  # pip install qrcode >/dev/null
+  pip install -q qrcode || { echo ""; twistlog "Cannot Install QRCode"; echo -e "# [\033[31;1mCannot Install QRCode, You may unable to configure clients by QRCode! \033[0m]"; echo ""; sleep 3; }
+  echo "ss://$(echo -n "${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port}" | base64 -w 0)" | qr
+  echo -e "visit:\t\t${GREEN_COLOR}https://github.com/icai/shellhub${NO_COLOR}"
+  echo -e "# [\033[32;1mss://\033[0m\033[34;1m$(echo -n "${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port}" | base64 -w 0)\033[0m]"
+
   echo
 }
 
@@ -208,9 +243,9 @@ install_shadowsocks(){
   init_release
   #statements
   if [[ ${PM} = "apt" ]]; then
-    apt-get install dnsutils -y
+    apt install dnsutils -y
     apt install net-tools -y
-    apt-get install python-pip -y
+    apt install python-pip -y
   elif [[ ${PM} = "yum" ]]; then
     yum install bind-utils -y
     yum install net-tools -y
@@ -224,7 +259,7 @@ config_ss() {
     # add shadowsocks config file
   cat <<EOT > /etc/shadowsocks-libev/config.json
 {
-  "server":"0.0.0.0",
+  "server":${PUBLICIP},
   "server_port":${server_port},
   "local_address": "127.0.0.1",
   "local_port":1080,
@@ -298,7 +333,6 @@ sysctl --system
 
 
 start_service(){
-  systemctl stop shadowsocks-libe
   systemctl start shadowsocks-libev
 }
 
@@ -315,8 +349,11 @@ main(){
     exit 1
   else
     intro
-    config
+    systemconfig
+    get_sysinfo
+    config_read
     install_shadowsocks
+    stop_service
     config_ss
     addTcpPort
     optimize_ss
