@@ -241,16 +241,19 @@ successInfo(){
 install_shadowsocks(){
   # init package manager
   init_release
-  #statements
-  if [[ ${PM} = "apt" ]]; then
-    apt install dnsutils -y
-    apt install net-tools -y
-    apt install python-pip -y
-  elif [[ ${PM} = "yum" ]]; then
-    yum install bind-utils -y
-    yum install net-tools -y
-    yum install python-setuptools -y && easy_install pip
-  fi
+  # #statements
+  # if [[ ${PM} = "apt" ]]; then
+  #   apt install dnsutils -y
+  #   apt install net-tools -y
+  #   apt install python-pip -y
+  # elif [[ ${PM} = "yum" ]]; then
+  #   yum install bind-utils -y
+  #   yum install net-tools -y
+  #   yum install python-setuptools -y && easy_install pip
+  # fi
+  apt install dnsutils -y
+  apt install net-tools -y
+  apt install python-pip -y
   # pip install shadowsocks
   apt install shadowsocks-libev -y
 }
@@ -339,6 +342,9 @@ stop_service(){
   systemctl stop shadowsocks-libev
 }
 
+reinstall() {
+  apt remove shadowsocks-libev
+}
 
 main(){
   #check root permission
@@ -347,6 +353,7 @@ main(){
     echo -e "${RED_COLOR}error:${NO_COLOR}Please run this script as as root"
     exit 1
   else
+    reinstall
     intro
     systemconfig
     get_sysinfo
