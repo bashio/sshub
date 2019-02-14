@@ -68,7 +68,7 @@ intro() {
   clear
   echo
   echo "******************************************************"
-  echo "* OS     : Ubuntu Debian CentOS                      *"
+  echo "* OS     :               Ubuntu                      *"
   echo "* Desc   : auto install shadowsocks on CentOS server *"
   echo "******************************************************"
   echo
@@ -228,7 +228,6 @@ successInfo(){
   ss_link=$(echo ${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port} | base64)
   ss_link="ss://${ss_link}"
   echo -e "ss_link:\t${GREEN_COLOR}${ss_link}${NO_COLOR}"
-  # pip install qrcode >/dev/null
   pip install -q qrcode || { echo ""; twistlog "Cannot Install QRCode"; echo -e "# [\033[31;1mCannot Install QRCode, You may unable to configure clients by QRCode! \033[0m]"; echo ""; sleep 3; }
   echo "ss://$(echo -n "${encryption_method}:${sspwd}@${IP_ADDRESS}:${server_port}" | base64 -w 0)" | qr
   echo -e "visit:\t\t${GREEN_COLOR}https://github.com/icai/shellhub${NO_COLOR}"
@@ -251,9 +250,7 @@ install_shadowsocks(){
   #   yum install net-tools -y
   #   yum install python-setuptools -y && easy_install pip
   # fi
-  apt install dnsutils -y
-  apt install net-tools -y
-  apt install python-pip -y
+  apt install dnsutils net-tools python-dev python-pip python-setuptools python-m2crypto -y
   # pip install shadowsocks
   apt install shadowsocks-libev -y
 }
