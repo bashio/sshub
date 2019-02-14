@@ -5,7 +5,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/shellhub/shellh
 
 [Shadowsocks](https://github.com/shellhub/blog/issues/18)
 ``` bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/shellhub/shellhub/master/proxy/shadowsocks.sh && chmod +x shadowsocks.sh && ./shadowsocks.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/icai/shellhub/master/proxy/shadowsocks.sh && chmod +x shadowsocks.sh && ./shadowsocks.sh
 ```
 
 [Shadowsocks Manager](https://github.com/shellhub/blog/issues/33)
