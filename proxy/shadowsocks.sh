@@ -298,8 +298,7 @@ sysctl --system
 
 
 start_service(){
-  systemctl daemon-reload
-  systemctl enable shadowsocks-libev
+  systemctl stop shadowsocks-libe
   systemctl start shadowsocks-libev
 }
 
