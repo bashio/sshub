@@ -250,6 +250,7 @@ install_shadowsocks(){
   #   yum install net-tools -y
   #   yum install python-setuptools -y && easy_install pip
   # fi
+  apt-get update
   apt install dnsutils net-tools python-dev python-pip python-setuptools python-m2crypto -y
   # pip install shadowsocks
   apt install shadowsocks-libev -y
