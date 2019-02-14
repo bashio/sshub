@@ -155,19 +155,6 @@ config(){
       break
     fi
   done
-  # add shadowsocks config file
-  cat <<EOT > /etc/shadowsocks-libev/config.json
-{
-  "server":"0.0.0.0",
-  "server_port":${server_port},
-  "local_address": "127.0.0.1",
-  "local_port":1080,
-  "password":"${sspwd}",
-  "timeout":300,
-  "method":"${encryption_method}",
-  "fast_open": false
-}
-EOT
 }
 
 containsIgnoreCase(){
@@ -232,6 +219,22 @@ install_shadowsocks(){
   fi
   # pip install shadowsocks
   apt install shadowsocks-libev -y
+}
+
+config_ss() {
+    # add shadowsocks config file
+  cat <<EOT > /etc/shadowsocks-libev/config.json
+{
+  "server":"0.0.0.0",
+  "server_port":${server_port},
+  "local_address": "127.0.0.1",
+  "local_port":1080,
+  "password":"${sspwd}",
+  "timeout":300,
+  "method":"${encryption_method}",
+  "fast_open": false
+}
+EOT
 }
 
 # stop firewall
@@ -316,7 +319,9 @@ main(){
     intro
     config
     install_shadowsocks
+    config_ss
     addTcpPort
+    optimize_ss
     # stop_firewall
     start_service
     successInfo
