@@ -254,16 +254,35 @@ install_shadowsocks(){
   #   yum install python-setuptools -y && easy_install pip
   # fi
   apt-get update
+  apt install rng-tools
   apt install dnsutils net-tools python-dev python-pip python-setuptools python-m2crypto -y
   # pip install shadowsocks
   apt install shadowsocks-libev -y
 }
 
 config_ss() {
+GMETADATA_ADDR=`dig +short metadata.google.internal`
+if [[ "${GMETADATA_ADDR}" == "" ]]; then
+
     # add shadowsocks config file
   cat <<EOT > /etc/shadowsocks-libev/config.json
+  {
+    "server":"${PUBLICIP}",
+    "server_port":${server_port},
+    "local_port":1080,
+    "password":"${sspwd}",
+    "timeout":300,
+    "method":"${encryption_method}",
+    "fast_open": false
+  }
+EOT
+
+else
+
+    # add shadowsocks config file for google vm
+  cat <<EOT > /etc/shadowsocks-libev/config.json
 {
-  "server":"${PUBLICIP}",
+  "server":"0.0.0.0",
   "server_port":${server_port},
   "local_port":1080,
   "password":"${sspwd}",
@@ -272,6 +291,9 @@ config_ss() {
   "fast_open": false
 }
 EOT
+
+fi
+
 }
 
 # stop firewall
